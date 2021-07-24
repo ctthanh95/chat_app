@@ -8,8 +8,8 @@ import {
     Alert,
     TouchableOpacity,
     ScrollView
-}
-    from 'react-native'
+} from 'react-native'
+import { SIGNIN } from '../../firebase'
 import { CustomButton, CustomImageButton, CustomInput } from '../../components'
 import { Colors, Fonts } from '../../constants'
 
@@ -36,7 +36,7 @@ const Login = ({ navigation }) => {
                     placeholder='Password'
                     secureTextEntry={true}
                 />
-                <CustomButton title='Sign In' onPress={() => Alert.alert('a')} />
+                <CustomButton title='Sign In' onPress={() => SIGNIN(email, password, navigation)} />
                 <TouchableOpacity style={styles.wrapForgot} onPress={() => Alert.alert('a')}>
                     <Text style={styles.textForgot}>Forgot Password?</Text>
                 </TouchableOpacity>

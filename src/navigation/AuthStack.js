@@ -7,6 +7,7 @@ import {
     Login,
     Onboard,
     Signup,
+    Home
 } from '../screens'
 import { Colors } from '../constants'
 
@@ -61,6 +62,7 @@ const AuthStack = () => {
                     }
                 })}
             />
+            <Stack.Screen name="Home" component={Home} options={{ header: () => null }} />
         </Stack.Navigator>
     )
 }
