@@ -9,13 +9,27 @@ import {
     TouchableOpacity,
     ScrollView
 } from 'react-native'
-import { SIGNIN } from '../../firebase'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
+
+import {
+    SIGN_IN,
+    LOGIN_WITH_FACEBOOK,
+    LOGIN_WITH_GOOGLE,
+    GET_CURRENT_USER_GOOGLE,
+    GET_CURRENT_USER_FACEBOOK
+} from '../../firebase'
 import { CustomButton, CustomImageButton, CustomInput } from '../../components'
 import { Colors, Fonts } from '../../constants'
 
 const Login = ({ navigation }) => {
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
+
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: '376268813058-4utruuio1kndakt69n5dites36ajerrd.apps.googleusercontent.com',
+        })
+    }, [])
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -36,7 +50,7 @@ const Login = ({ navigation }) => {
                     placeholder='Password'
                     secureTextEntry={true}
                 />
-                <CustomButton title='Sign In' onPress={() => SIGNIN(email, password, navigation)} />
+                <CustomButton title='Sign In' onPress={() => SIGN_IN(email, password, navigation)} />
                 <TouchableOpacity style={styles.wrapForgot} onPress={() => Alert.alert('a')}>
                     <Text style={styles.textForgot}>Forgot Password?</Text>
                 </TouchableOpacity>
@@ -45,14 +59,31 @@ const Login = ({ navigation }) => {
                     title='Sign In with Facebook'
                     color="#4867aa"
                     backgroundColor="#e6eaf4"
-                    onPress={() => Alert.alert('a')}
+                    onPress={() => LOGIN_WITH_FACEBOOK().then(() => {
+                        GET_CURRENT_USER_FACEBOOK()
+                        Alert.alert(
+                            "Alert Title",
+                            "My Alert Msg",
+                            [
+                                {
+                                    text: "Cancel",
+                                    onPress: () => console.log("Cancel Pressed"),
+                                    style: "cancel"
+                                },
+                                { text: "OK", onPress: () => navigation.navigate('Home') }
+                            ]
+                        )
+                    })}
                 />
                 <CustomImageButton
                     name="google"
                     title='Sign In with Google'
                     color="#de4d41"
                     backgroundColor="#f5e7ea"
-                    onPress={() => Alert.alert('a')}
+                    onPress={() => LOGIN_WITH_GOOGLE().then(() => {
+                        GET_CURRENT_USER_GOOGLE()
+                        navigation.navigate('Home')
+                    })}
                 />
                 <TouchableOpacity
                     style={styles.wrapForgot}

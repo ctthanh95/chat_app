@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import { Colors, Fonts } from '../../constants'
 import { CustomButton, CustomImageButton, CustomInput } from '../../components'
-import { SIGNUP } from '../../firebase'
+import { SIGN_UP } from '../../firebase'
 
 const Signup = ({ navigation }) => {
     const [email, setEmail] = useState();
@@ -53,7 +53,23 @@ const Signup = ({ navigation }) => {
                         Privacy Policy
                     </Text>
                 </View>
-                <CustomButton title='Sign Up' onPress={() => SIGNUP(name, email, password, '', navigation)} />
+                <CustomButton title='Sign Up' onPress={() => {
+                    SIGN_UP(name, email, password, '')
+                    Alert.alert(
+                        "Alert Title",
+                        "My Alert Msg",
+                        [
+                            {
+                                text: "Cancel",
+                                onPress: () => console.log("Cancel Pressed"),
+                                style: "cancel"
+                            },
+                            { text: "OK", onPress: () => navigation.navigate('Login') }
+                        ]
+                    );
+
+                }
+                } />
                 <CustomImageButton
                     name="facebook"
                     title='Sign Up with Facebook'

@@ -1,32 +1,29 @@
-import React from "react";
+import React from "react"
 import { Alert } from "react-native";
 import auth from '@react-native-firebase/auth'
 import database from '@react-native-firebase/database'
+import { LoginManager, AccessToken } from 'react-native-fbsdk-next'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 
-export const SIGNUP = (name, email, password, image, navigation) => {
+
+
+const ADD_USER = (id, name, email, image) => {
+    database()
+        .ref('/users/' + id)
+        .set({
+            id: id,
+            name: name,
+            email: email,
+            image: image,
+        })
+}
+
+export const SIGN_UP = (name, email, password, image) => {
     auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
             let id = auth().currentUser.uid
-            database()
-                .ref('/users/' + id)
-                .set({
-                    id: id,
-                    name: name,
-                    email: email,
-                    image: image,
-                })
-                .then(() => {
-                    auth().signOut()
-                    Alert.alert(
-                        "Alert Title",
-                        "Sign Up Success",
-                        [
-                            { text: "OK", onPress: () => navigation.navigate('Login') }
-                        ]
-                    );
-
-                })
+            ADD_USER(id, name, email, image)
         })
         .catch(error => {
             if (error.code === 'auth/email-already-in-use') {
@@ -39,7 +36,7 @@ export const SIGNUP = (name, email, password, image, navigation) => {
         });
 }
 
-export const SIGNIN = (email, password, navigation) => {
+export const SIGN_IN = (email, password, navigation) => {
     auth()
         .signInWithEmailAndPassword(email, password)
         .then(() => {
@@ -60,3 +57,46 @@ export const SIGNIN = (email, password, navigation) => {
             console.error(error);
         });
 }
+
+export const LOGIN_WITH_FACEBOOK = async () => {
+    const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+
+    if (result.isCancelled) {
+        throw 'User cancelled the login process';
+    }
+
+    // Once signed in, get the users AccesToken
+    const data = await AccessToken.getCurrentAccessToken();
+
+    if (!data) {
+        throw 'Something went wrong obtaining access token';
+    }
+
+    // Create a Firebase credential with the AccessToken
+    const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
+
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(facebookCredential);
+}
+
+export const LOGIN_WITH_GOOGLE = async () => {
+    // Get the users ID token
+    const { idToken } = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
+}
+
+export const GET_CURRENT_USER_GOOGLE = async () => {
+    const currentUser = await GoogleSignin.getCurrentUser();
+    const infoUser = currentUser.user
+    let id = auth().currentUser.uid
+    ADD_USER(id, infoUser.name, infoUser.email, infoUser.photo)
+};
+
+export const GET_CURRENT_USER_FACEBOOK = async () => {
+    const infoUser = auth().currentUser
+    ADD_USER(infoUser.uid, infoUser.displayName, infoUser.email, infoUser.photoURL)
+};

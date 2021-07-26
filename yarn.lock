@@ -1203,6 +1203,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-firebase/database/-/database-12.3.0.tgz#70c28174fde3836d02f5b8dd64579ef4dc1d3665"
   integrity sha512-6jmntjgStx6jSNzsWWCjlk3Qt2LHirp26O1MUbCHhZn5dXdSuL4w55fjOr/x+euCwN5C4hGeFMPqT6yeqgfdGQ==
 
+"@react-native-google-signin/google-signin@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@react-native-google-signin/google-signin/-/google-signin-6.0.1.tgz#c953c24c74c42009f59213015d4bdd4e58133c54"
+  integrity sha512-8Kyt3v6JcAQoJqZau3z4Mj+8R5Zv1yB8TfL/iCrB6ZI9lIR7gm4wuNzgpNSjX7OwNTboyhBek9Tjx8qJj7a6Mw==
+
 "@react-native/assets@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@react-native/assets/-/assets-1.0.0.tgz#c6f9bf63d274bafc8e970628de24986b30a55c8e"
@@ -5659,6 +5664,11 @@ react-native-codegen@^0.0.6:
     flow-parser "^0.121.0"
     jscodeshift "^0.11.0"
     nullthrows "^1.1.1"
+
+react-native-fbsdk-next@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/react-native-fbsdk-next/-/react-native-fbsdk-next-4.3.0.tgz#750952a9c2159a7eed830846a3814ab8ce03ba0c"
+  integrity sha512-wJUSgM6hq/gImnp/HflTI5750GNADtxCEEhDD6lXJDPuNfAPfAXi54XcAVa5nbijJMCBr+z3wFZ/gF8PrqdxTQ==
 
 react-native-gesture-handler@^1.10.3:
   version "1.10.3"
