@@ -4,6 +4,7 @@ import Onboarding from 'react-native-onboarding-swiper'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import Feather from 'react-native-vector-icons/Feather'
 import { Colors, Fonts } from '../../constants'
+import { SET_ITEM } from '../../asyncstorage'
 
 const Onboard = ({ navigation }) => {
     const Skip = ({ ...props }) => {
@@ -16,7 +17,7 @@ const Onboard = ({ navigation }) => {
     const Next = ({ ...props }) => {
         return (
             <TouchableOpacity style={styles.wrapButton} {...props}>
-                <Feather name='chevron-right' size={30} color={Colors.primary} />
+                <Feather name='chevron-right' size={30} color={Colors.black} />
             </TouchableOpacity>
         )
     }
@@ -33,31 +34,40 @@ const Onboard = ({ navigation }) => {
             SkipButtonComponent={Skip}
             NextButtonComponent={Next}
             onSkip={() => {
-                navigation.replace('Login')
-                AsyncStorage.setItem('alreadyLaunched', 'false')
+                SET_ITEM('alreadyLaunched', 'false').then(() => navigation.replace('Login'))
             }}
             onDone={() => {
-                navigation.navigate('Login')
-                AsyncStorage.setItem('alreadyLaunched', 'false')
+                SET_ITEM('alreadyLaunched', 'false').then(() => navigation.navigate('Login'))
+            }}
+            titleStyles={{
+                color: 'black',
+                fontFamily: Fonts.bold,
+                fontSize: 30
+            }}
+            subTitleStyles={{
+                color: 'white',
+                fontFamily: Fonts.light,
+                fontSize: 15,
+
             }}
             pages={[
                 {
-                    backgroundColor: '#fff',
+                    backgroundColor: '#33CC33',
                     image: <Image source={require('../../assets/images/onboard-1.png')} />,
-                    title: 'Onboarding',
-                    subtitle: 'Done with React Native Onboarding Swiper',
+                    title: 'Connect to the World',
+                    subtitle: 'A New Way To Connect With The World',
                 },
                 {
-                    backgroundColor: '#fff',
+                    backgroundColor: '#00CCFF',
                     image: <Image source={require('../../assets/images/onboard-2.png')} />,
-                    title: 'Onboarding',
-                    subtitle: 'Done with React Native Onboarding Swiper',
+                    title: 'Share Your Favorites',
+                    subtitle: 'Share Your Thoughts With Similar Kind of People',
                 },
                 {
-                    backgroundColor: '#fff',
+                    backgroundColor: '#CD853F',
                     image: <Image source={require('../../assets/images/onboard-3.png')} />,
-                    title: 'Onboarding',
-                    subtitle: 'Done with React Native Onboarding Swiper',
+                    title: 'Become The Star',
+                    subtitle: "Let The Spot Light Capture You",
                 },
             ]}
         />
@@ -79,12 +89,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 10
+        marginRight: 10,
     },
     wrapText: {
         width: 80,
         height: 40,
-        borderRadius: 25,
+        borderRadius: 10,
         backgroundColor: Colors.white,
         justifyContent: 'center',
         alignItems: 'center',

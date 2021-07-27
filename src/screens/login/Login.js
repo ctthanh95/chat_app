@@ -10,7 +10,7 @@ import {
     ScrollView
 } from 'react-native'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
-
+import Spinner from 'react-native-loading-spinner-overlay'
 import {
     SIGN_IN,
     LOGIN_WITH_FACEBOOK,
@@ -20,22 +20,35 @@ import {
 } from '../../firebase'
 import { CustomButton, CustomImageButton, CustomInput } from '../../components'
 import { Colors, Fonts } from '../../constants'
+import { GET_ITEM } from '../../asyncstorage'
 
 const Login = ({ navigation }) => {
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState();
+    const [email, setEmail] = useState()
+    const [password, setPassword] = useState()
+    const [spinner, setSpinner] = useState(false)
 
     useEffect(() => {
         GoogleSignin.configure({
             webClientId: '376268813058-4utruuio1kndakt69n5dites36ajerrd.apps.googleusercontent.com',
         })
     }, [])
+
+    useEffect(async () => {
+        setSpinner(true)
+        const id = await GET_ITEM('ID')
+        if (id) {
+            navigation.navigate('Home')
+            setSpinner(false)
+        }
+        setSpinner(false)
+    }, [])
+
     return (
         <ScrollView>
             <View style={styles.container}>
                 <Image source={require('../../assets/images/logo.png')} resizeMode='cover' />
                 <CustomInput
-                    name='user'
+                    name='mail'
                     labelValue={email}
                     onChangeText={userEmail => setEmail(userEmail)}
                     placeholder='Email'
@@ -50,7 +63,7 @@ const Login = ({ navigation }) => {
                     placeholder='Password'
                     secureTextEntry={true}
                 />
-                <CustomButton title='Sign In' onPress={() => SIGN_IN(email, password, navigation)} />
+                <CustomButton title='Sign In' onPress={() => SIGN_IN(email, password, navigation, setSpinner)} />
                 <TouchableOpacity style={styles.wrapForgot} onPress={() => Alert.alert('a')}>
                     <Text style={styles.textForgot}>Forgot Password?</Text>
                 </TouchableOpacity>
@@ -60,19 +73,7 @@ const Login = ({ navigation }) => {
                     color="#4867aa"
                     backgroundColor="#e6eaf4"
                     onPress={() => LOGIN_WITH_FACEBOOK().then(() => {
-                        GET_CURRENT_USER_FACEBOOK()
-                        Alert.alert(
-                            "Alert Title",
-                            "My Alert Msg",
-                            [
-                                {
-                                    text: "Cancel",
-                                    onPress: () => console.log("Cancel Pressed"),
-                                    style: "cancel"
-                                },
-                                { text: "OK", onPress: () => navigation.navigate('Home') }
-                            ]
-                        )
+                        GET_CURRENT_USER_FACEBOOK(navigation)
                     })}
                 />
                 <CustomImageButton
@@ -81,8 +82,7 @@ const Login = ({ navigation }) => {
                     color="#de4d41"
                     backgroundColor="#f5e7ea"
                     onPress={() => LOGIN_WITH_GOOGLE().then(() => {
-                        GET_CURRENT_USER_GOOGLE()
-                        navigation.navigate('Home')
+                        GET_CURRENT_USER_GOOGLE(navigation)
                     })}
                 />
                 <TouchableOpacity
@@ -93,6 +93,11 @@ const Login = ({ navigation }) => {
                     </Text>
                 </TouchableOpacity>
             </View>
+            <Spinner
+                visible={spinner}
+                textContent={'Loading...'}
+                textStyle={{ color: Colors.white }}
+            />
         </ScrollView>
     )
 }

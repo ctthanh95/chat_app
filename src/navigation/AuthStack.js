@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { TouchableOpacity, View } from 'react-native'
-import AntDesign from 'react-native-vector-icons/AntDesign'
 import { createStackNavigator } from '@react-navigation/stack'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
     Login,
     Onboard,
     Signup,
     Home
 } from '../screens'
+import { SIGN_OUT } from '../firebase'
+import { CustomHeader } from '../components'
+import { REMOVE_ITEM, GET_ITEM } from '../asyncstorage'
 import { Colors } from '../constants'
 
 const Stack = createStackNavigator();
@@ -19,7 +19,7 @@ const AuthStack = () => {
     let routeName
 
     useEffect(() => {
-        AsyncStorage.getItem('alreadyLaunched').then(value => {
+        GET_ITEM('alreadyLaunched').then(value => {
             if (value === null) {
                 setIsFirstLaunch(true)
             } else {
@@ -52,17 +52,40 @@ const AuthStack = () => {
                     },
                     headerLeft: () => {
                         return (
-                            <TouchableOpacity
-                                style={{ marginLeft: 5 }}
-                                onPress={() => navigation.navigate('Login')}>
-                                <AntDesign name="arrowleft" size={30} color={Colors.black} />
-                            </TouchableOpacity>
+                            <CustomHeader
+                                name='arrowleft'
+                                onPress={() => navigation.navigate('Login')}
+                            />
                         )
 
                     }
                 })}
             />
-            <Stack.Screen name="Home" component={Home} options={{ header: () => null }} />
+            <Stack.Screen
+                name="Home"
+                component={Home}
+                options={({ navigation }) => ({
+                    title: 'Messages',
+                    headerStyle: {
+                        backgroundColor: '#f9fafd',
+                        shadowColor: '#f9fafd',
+                        elevation: 0
+                    },
+                    headerLeft: '',
+                    headerRight: () => {
+                        return (
+                            <CustomHeader
+                                name='login'
+                                onPress={() => {
+                                    SIGN_OUT()
+                                    navigation.navigate('Login')
+                                }}
+                            />
+                        )
+
+                    }
+                })}
+            />
         </Stack.Navigator>
     )
 }

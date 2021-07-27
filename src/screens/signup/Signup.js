@@ -1,17 +1,33 @@
-import React, { useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Image } from 'react-native'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
+import Spinner from 'react-native-loading-spinner-overlay'
 import { Colors, Fonts } from '../../constants'
 import { CustomButton, CustomImageButton, CustomInput } from '../../components'
-import { SIGN_UP } from '../../firebase'
+import {
+    SIGN_UP,
+    LOGIN_WITH_FACEBOOK,
+    LOGIN_WITH_GOOGLE,
+    GET_CURRENT_USER_GOOGLE,
+    GET_CURRENT_USER_FACEBOOK
+} from '../../firebase'
 
 const Signup = ({ navigation }) => {
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState();
+    const [email, setEmail] = useState()
+    const [password, setPassword] = useState()
     const [name, setName] = useState()
+    const [spinner, setSpinner] = useState(false)
+
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: '376268813058-4utruuio1kndakt69n5dites36ajerrd.apps.googleusercontent.com',
+        })
+    }, [])
     return (
         <ScrollView>
             <View style={styles.container}>
                 <Text style={styles.text}>Create an account</Text>
+                <Image source={require('../../assets/images/signup.png')} resizeMode='cover' />
                 <CustomInput
                     name='user'
                     labelValue={name}
@@ -54,20 +70,7 @@ const Signup = ({ navigation }) => {
                     </Text>
                 </View>
                 <CustomButton title='Sign Up' onPress={() => {
-                    SIGN_UP(name, email, password, '')
-                    Alert.alert(
-                        "Alert Title",
-                        "My Alert Msg",
-                        [
-                            {
-                                text: "Cancel",
-                                onPress: () => console.log("Cancel Pressed"),
-                                style: "cancel"
-                            },
-                            { text: "OK", onPress: () => navigation.navigate('Login') }
-                        ]
-                    );
-
+                    SIGN_UP(name, email, password, '', setSpinner, navigation)
                 }
                 } />
                 <CustomImageButton
@@ -75,15 +78,18 @@ const Signup = ({ navigation }) => {
                     title='Sign Up with Facebook'
                     color="#4867aa"
                     backgroundColor="#e6eaf4"
-                    onPress={() => Alert.alert('a')}
+                    onPress={() => LOGIN_WITH_FACEBOOK().then(() => {
+                        GET_CURRENT_USER_FACEBOOK(navigation)
+                    })}
                 />
                 <CustomImageButton
                     name="google"
-                    title='Sign Up with Google"
-                btnType="google"'
+                    title='Sign In with Google'
                     color="#de4d41"
                     backgroundColor="#f5e7ea"
-                    onPress={() => Alert.alert('a')}
+                    onPress={() => LOGIN_WITH_GOOGLE().then(() => {
+                        GET_CURRENT_USER_GOOGLE(navigation)
+                    })}
                 />
                 <TouchableOpacity
                     style={styles.wrapForgot}
@@ -93,6 +99,11 @@ const Signup = ({ navigation }) => {
                     </Text>
                 </TouchableOpacity>
             </View>
+            <Spinner
+                visible={spinner}
+                textContent={'Loading...'}
+                textStyle={{ color: Colors.white }}
+            />
         </ScrollView>
     )
 }
