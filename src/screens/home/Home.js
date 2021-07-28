@@ -2,26 +2,55 @@ import React, { useEffect, useState } from 'react'
 import { FlatList, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { GET_ALL_USER, } from '../../firebase'
+import ImagePicker from 'react-native-image-crop-picker'
+import ImgToBase64 from 'react-native-image-base64'
+import { GET_ALL_USER, UPDATE_USER_IMAGE } from '../../firebase'
+import { GET_ITEM } from '../../asyncstorage'
 import { DimensionDevice, Fonts } from '../../constants'
 
-const Home = () => {
+const Home = ({ navigation }) => {
     const [allUsers, setAllUsers] = useState([])
     const [spinner, setSpinner] = useState(false)
+    const [imageChoose, setImageChoose] = useState('')
+    const [userName, setUserName] = useState('')
+    const [sender, setSender] = useState('')
 
-    useEffect(() => {
-        GET_ALL_USER(setAllUsers, setSpinner)
+    useEffect(async () => {
+        setSender(await GET_ITEM('ID'))
+        GET_ALL_USER(setAllUsers, setSpinner, setUserName, setImageChoose)
     }, [])
+
+    const ChooseImage = () => {
+        ImagePicker.openPicker({
+            width: 120,
+            height: 120,
+            cropping: true
+        }).then(image => {
+            ImgToBase64.getBase64String(image.path)
+                .then(base64String => {
+                    let source = "data:image/jpeg;base64," + base64String
+                    setImageChoose(image.path)
+                    UPDATE_USER_IMAGE(sender, source)
+                })
+                .catch(err => console.log(err));
+        });
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.wrapUser}>
-                <Image
-                    style={styles.image}
-                    resizeMode='contain'
-                    source={{ uri: 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' }}
-                />
+                <TouchableOpacity
+                    onPress={ChooseImage}
+                >
+                    <Image
+                        style={styles.image}
+                        resizeMode='contain'
+                        source={{ uri: imageChoose === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : imageChoose }}
+                    />
+                </TouchableOpacity>
+
                 <View style={styles.wrapText}>
-                    <Text style={styles.text}>Name</Text>
+                    <Text style={styles.text}>{userName}</Text>
                     <TouchableOpacity>
                         <AntDesign name={'setting'} size={20} color={'white'} />
                     </TouchableOpacity>
@@ -29,9 +58,19 @@ const Home = () => {
             </View>
             <FlatList
                 data={allUsers}
-                renderItem={({ item }) => {
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => {
                     return (
-                        <TouchableOpacity style={styles.wrapItem}>
+                        <TouchableOpacity
+                            style={styles.wrapItem}
+                            onPress={() => navigation.navigate('Chat', {
+                                title: item.name,
+                                receiver: item.id,
+                                sender: sender,
+                                imageSender: imageChoose,
+                                imageReceiver: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image
+                            })}
+                        >
                             <Image style={styles.itemImage} source={{ uri: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image }} />
                             <Text style={styles.itemText}>{item.name}</Text>
                         </TouchableOpacity>
@@ -69,7 +108,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginVertical: 5,
         justifyContent: 'space-around',
-        width: 150,
+        width: 200,
     },
     image: {
         width: 120,
@@ -86,7 +125,7 @@ const styles = StyleSheet.create({
     wrapItem: {
         backgroundColor: '#EFF2F9',
         width: '100%',
-        height: 75,
+        height: 70,
         borderRadius: 10,
         marginBottom: 10,
         alignItems: 'center',

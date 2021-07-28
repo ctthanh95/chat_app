@@ -4,7 +4,8 @@ import {
     Login,
     Onboard,
     Signup,
-    Home
+    Home,
+    Chat
 } from '../screens'
 import { SIGN_OUT } from '../firebase'
 import { CustomHeader } from '../components'
@@ -80,6 +81,27 @@ const AuthStack = () => {
                                     SIGN_OUT()
                                     navigation.navigate('Login')
                                 }}
+                            />
+                        )
+
+                    }
+                })}
+            />
+            <Stack.Screen
+                name="Chat"
+                component={Chat}
+                options={({ navigation, route }) => ({
+                    title: route.params.title,
+                    headerStyle: {
+                        backgroundColor: '#f9fafd',
+                        shadowColor: '#f9fafd',
+                        elevation: 0
+                    },
+                    headerLeft: () => {
+                        return (
+                            <CustomHeader
+                                name='arrowleft'
+                                onPress={() => navigation.navigate('Home')}
                             />
                         )
 

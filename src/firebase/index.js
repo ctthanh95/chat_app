@@ -5,6 +5,8 @@ import database from '@react-native-firebase/database'
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { SET_ITEM, REMOVE_ITEM } from '../asyncstorage'
+import moment from 'moment'
+import { cleanSingle } from "react-native-image-crop-picker";
 
 const ADD_USER = (id, name, email, image) => {
     database()
@@ -122,7 +124,7 @@ export const GET_CURRENT_USER_FACEBOOK = (navigation) => {
     navigation.navigate('Home')
 };
 
-export const GET_ALL_USER = (setAllUsers, setSpinner) => {
+export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoose) => {
     setSpinner(true)
     database()
         .ref('/users')
@@ -131,7 +133,8 @@ export const GET_ALL_USER = (setAllUsers, setSpinner) => {
             let users = []
             snapshot.forEach(e => {
                 if (e.val().id === id) {
-
+                    setUserName(e.val().name)
+                    setImageChoose(e.val().image)
                 } else {
                     users.push({
                         id: e.val().id,
@@ -149,4 +152,65 @@ export const SIGN_OUT = () => {
     auth()
         .signOut()
         .then(() => REMOVE_ITEM('ID'));
+}
+
+export const UPDATE_USER_IMAGE = (id, source) => {
+    database()
+        .ref('/users/' + id)
+        .update({
+            image: source,
+        })
+    //.then(() => console.log('Data updated.'));
+}
+
+export const SEND_MESSAGE = (sender, receiver, message, imageMessage) => {
+    let today = moment()
+    database().ref('/messages/' + sender).child(receiver)
+        .push({
+            msg: {
+                sender: sender,
+                receiver: receiver,
+                message: message,
+                imageMessage: imageMessage,
+                day: today.format('YYYY-MM-DD'),
+                time: today.format('HH:mm A')
+            }
+        })
+}
+
+export const RECEIVE_MESSAGE = (sender, receiver, message, imageMessage) => {
+    let today = moment()
+    database().ref('/messages/' + receiver).child(sender)
+        .push({
+            msg: {
+                sender: sender,
+                receiver: receiver,
+                message: message,
+                imageMessage: imageMessage,
+                day: today.format('YYYY-MM-DD'),
+                time: today.format('HH:mm A')
+            }
+        })
+
+}
+
+export const GET_ALL_MESSAGES_BETWEEN_SENDER_RECEIVER = (sender, receiver, setAllMessages, setSpinner) => {
+    setSpinner(true)
+    database()
+        .ref('messages').child(sender).child(receiver)
+        .on('value', snapshot => {
+            let messages = []
+            snapshot.forEach(e => {
+                messages.push({
+                    sender: e.val().msg.sender,
+                    message: e.val().msg.message,
+                    receiver: e.val().msg.receiver,
+                    imageMessage: e.val().msg.imageMessage,
+                    day: e.val().msg.day,
+                    time: e.val().msg.time
+                })
+            })
+            setAllMessages(messages.reverse())
+            setSpinner(false)
+        });
 }
