@@ -4,6 +4,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import Spinner from 'react-native-loading-spinner-overlay'
 import ImagePicker from 'react-native-image-crop-picker'
 import ImgToBase64 from 'react-native-image-base64'
+import moment from 'moment'
 import { GET_ALL_USER, UPDATE_USER_IMAGE } from '../../firebase'
 import { GET_ITEM } from '../../asyncstorage'
 import { DimensionDevice, Fonts } from '../../constants'
@@ -17,6 +18,9 @@ const Home = ({ navigation }) => {
 
     useEffect(async () => {
         setSender(await GET_ITEM('ID'))
+    }, [])
+
+    useEffect(() => {
         GET_ALL_USER(setAllUsers, setSpinner, setUserName, setImageChoose)
     }, [])
 
@@ -51,7 +55,11 @@ const Home = ({ navigation }) => {
 
                 <View style={styles.wrapText}>
                     <Text style={styles.text}>{userName}</Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            console.log(allUsers)
+                        }}
+                    >
                         <AntDesign name={'setting'} size={20} color={'white'} />
                     </TouchableOpacity>
                 </View>
@@ -67,12 +75,41 @@ const Home = ({ navigation }) => {
                                 title: item.name,
                                 receiver: item.id,
                                 sender: sender,
-                                imageSender: imageChoose,
+                                imageSender: imageChoose === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : imageChoose,
                                 imageReceiver: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image
                             })}
                         >
-                            <Image style={styles.itemImage} source={{ uri: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image }} />
-                            <Text style={styles.itemText}>{item.name}</Text>
+
+
+
+                            <View style={styles.wrapImageItem}>
+                                <Image style={styles.itemImage} source={{ uri: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image }} />
+
+                            </View>
+                            {
+                                item.lastMessage === '' ? (
+                                    <View style={[styles.wrapTextItem, { justifyContent: 'center' }]}>
+                                        <Text nunumberOfLines={1} style={styles.name}>{item.name}</Text>
+                                    </View>
+                                ) : (
+                                    <View style={styles.wrapTextItem}>
+                                        <View style={styles.wrapTextItemChild}>
+                                            <Text nunumberOfLines={1} style={styles.name}>{item.name}</Text>
+                                            <Text nunumberOfLines={1} style={styles.time}>
+                                                {
+                                                    moment(item.lastTime + " " + item.lastDate, "HH:mm:ss YYYY-MM-DD").fromNow()
+
+                                                }
+                                            </Text>
+                                        </View>
+                                        <View style={styles.wrapTextItemChild}>
+                                            <Text nunumberOfLines={1} style={styles.message}>{item.lastMessage}</Text>
+                                            {/* <Text nunumberOfLines={1}>{item.lastMessage}</Text> */}
+                                        </View>
+                                    </View>
+                                )
+                            }
+
                         </TouchableOpacity>
                     )
                 }}
@@ -118,29 +155,54 @@ const styles = StyleSheet.create({
     },
     text: {
         fontFamily: Fonts.bold,
-        fontSize: 16,
+        fontSize: 18,
         paddingHorizontal: 5,
         color: Colors.white,
     },
     wrapItem: {
         backgroundColor: '#EFF2F9',
-        width: '100%',
-        height: 70,
+        height: 100,
         borderRadius: 10,
         marginBottom: 10,
-        alignItems: 'center',
-        padding: 20,
+        padding: 10,
         flexDirection: 'row',
     },
-    itemText: {
-        fontFamily: Fonts.bold,
-        fontSize: 16,
-        color: Colors.black,
+    wrapImageItem: {
+        flex: 1,
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingRight: 10
+    },
+    wrapTextItem: {
+        height: '100%',
+        flex: 4,
+    },
+    wrapTextItemChild: {
+        flexDirection: 'row',
+        width: '100%',
+        height: '50%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     itemImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 999,
-        marginRight: 20
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+    },
+    name: {
+        color: Colors.black,
+        fontFamily: Fonts.bold,
+        fontSize: 18
+    },
+    time: {
+        color: Colors.primary,
+        fontFamily: Fonts.bold,
+        fontSize: 12
+    },
+    message: {
+        color: '#0000FF',
+        fontFamily: Fonts.italic,
+        fontSize: 16,
     }
 })

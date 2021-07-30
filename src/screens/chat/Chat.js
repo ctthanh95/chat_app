@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Image } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Image, Keyboard } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -39,10 +39,10 @@ const Chat = ({ route }) => {
         if (message) {
             SEND_MESSAGE(sender, receiver, message, '')
             RECEIVE_MESSAGE(sender, receiver, message, '')
+            Keyboard.dismiss()
             setMessage('')
         }
     }
-
     return (
         <View style={styles.container}>
             <FlatList
@@ -182,7 +182,7 @@ const Chat = ({ route }) => {
                     <View style={styles.wrapInput}>
                         <TextInput
                             style={styles.textInput}
-                            placeholder='Enter your massage here...'
+                            placeholder='Enter your massage'
                             placeholderTextColor="#00000080"
                             value={message}
                             onChangeText={setMessage}

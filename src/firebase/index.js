@@ -131,20 +131,54 @@ export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoos
         .on('value', snapshot => {
             let id = auth().currentUser.uid
             let users = []
+            let lastMessage, lastTime, lastDate, lastDateTime
             snapshot.forEach(e => {
                 if (e.val().id === id) {
-                    setUserName(e.val().name)
-                    setImageChoose(e.val().image)
+                    setUserName(e.val().name);
+                    setImageChoose(e.val().image);
                 } else {
-                    users.push({
-                        id: e.val().id,
-                        name: e.val().name,
-                        image: e.val().image,
+                    let userTemp = {
+                        id: '',
+                        name: '',
+                        image: '',
+                        lastMessage: '',
+                        lastDate: '',
+                        lastTime: '',
+                        lastDateTime: '',
+                    }
+                    new Promise((resolve) => {
+                        database().ref('messages')
+                            .child(id).child(e.val().id).orderByKey().limitToLast(1)
+                            .on('value', snapshotLast => {
+                                if (snapshotLast.val()) {
+                                    snapshotLast.forEach(i => {
+                                        lastMessage = i.val().msg.imageMessage !== '' ? 'Photo' : i.val().msg.message
+                                        lastDate = i.val().msg.day
+                                        lastTime = i.val().msg.time
+                                        lastDateTime = i.val().msg.time + " " + i.val().msg.day
+                                    })
+                                } else {
+                                    lastMessage = ''
+                                    lastDate = ''
+                                    lastTime = ''
+                                    lastDateTime = ''
+                                }
+                                userTemp.id = e.val().id
+                                userTemp.name = e.val().name
+                                userTemp.image = e.val().image
+                                userTemp.lastMessage = lastMessage
+                                userTemp.lastDate = lastDate
+                                userTemp.lastTime = lastTime
+                                userTemp.lastDateTime = lastDateTime ? moment(lastDateTime, "HH:mm:ss YYYY-MM-DD").valueOf() : 0
+                                return resolve(userTemp)
+                            })
+                    }).then(userTemp => {
+                        users.push(userTemp)
+                        setAllUsers(users.sort((a, b) => b.lastDateTime - a.lastDateTime))
+                        setSpinner(false)
                     })
                 }
-            })
-            setAllUsers(users)
-            setSpinner(false)
+            });
         });
 }
 
@@ -173,7 +207,7 @@ export const SEND_MESSAGE = (sender, receiver, message, imageMessage) => {
                 message: message,
                 imageMessage: imageMessage,
                 day: today.format('YYYY-MM-DD'),
-                time: today.format('HH:mm A')
+                time: today.format('HH:mm:ss')
             }
         })
 }
@@ -188,7 +222,7 @@ export const RECEIVE_MESSAGE = (sender, receiver, message, imageMessage) => {
                 message: message,
                 imageMessage: imageMessage,
                 day: today.format('YYYY-MM-DD'),
-                time: today.format('HH:mm A')
+                time: today.format('HH:mm:ss')
             }
         })
 
@@ -214,3 +248,4 @@ export const GET_ALL_MESSAGES_BETWEEN_SENDER_RECEIVER = (sender, receiver, setAl
             setSpinner(false)
         });
 }
+
