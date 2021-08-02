@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Image } fr
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { Colors, Fonts } from '../../constants'
-import { CustomButton, CustomImageButton, CustomInput } from '../../components'
+import { CustomButton, CustomImageButton, CustomInput, CustomAlert } from '../../components'
 import {
     SIGN_UP,
     LOGIN_WITH_FACEBOOK,
@@ -13,24 +13,54 @@ import {
 } from '../../firebase'
 
 const Signup = ({ navigation }) => {
-    const [email, setEmail] = useState()
-    const [password, setPassword] = useState()
-    const [name, setName] = useState()
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [name, setName] = useState('')
     const [spinner, setSpinner] = useState(false)
+    const [isShow, setIsShow] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(true)
+    const [title, setTitle] = useState('')
+
+    const SetIsShow = () => {
+        setIsShow(false)
+    }
 
     useEffect(() => {
         GoogleSignin.configure({
             webClientId: '376268813058-4utruuio1kndakt69n5dites36ajerrd.apps.googleusercontent.com',
         })
     }, [])
+
     return (
         <ScrollView>
+            {
+                isSuccess ? (
+                    isShow ? <CustomAlert
+                        name='checkcircleo'
+                        title='Success'
+                        description='Registration successful'
+                        color={Colors.blue}
+                        navigation={navigation}
+                        SetIsShow={SetIsShow}
+                        isSuccess={isSuccess}
+                    /> : null
+                ) : (
+                    isShow ? <CustomAlert
+                        name='exclamationcircleo'
+                        title='Registration unsuccessful'
+                        description={title}
+                        color={'#FF0000'}
+                        navigation={navigation}
+                        SetIsShow={SetIsShow}
+                        isSuccess={isSuccess} /> : null
+                )
+
+            }
             <View style={styles.container}>
-                <Text style={styles.text}>Create an account</Text>
                 <Image source={require('../../assets/images/signup.png')} resizeMode='cover' />
                 <CustomInput
                     name='user'
-                    labelValue={name}
+                    value={name}
                     onChangeText={userName => setName(userName)}
                     placeholder='Name'
                     keyboardType="email-address"
@@ -40,7 +70,7 @@ const Signup = ({ navigation }) => {
                 />
                 <CustomInput
                     name='mail'
-                    labelValue={email}
+                    value={email}
                     onChangeText={userEmail => setEmail(userEmail)}
                     placeholder='Email'
                     keyboardType="email-address"
@@ -50,7 +80,7 @@ const Signup = ({ navigation }) => {
                 />
                 <CustomInput
                     name='lock'
-                    labelValue={password}
+                    value={password}
                     onChangeText={userPassword => setPassword(userPassword)}
                     placeholder='Password'
                     placeholderTextColor="#00000050"
@@ -60,7 +90,6 @@ const Signup = ({ navigation }) => {
                     <Text style={styles.textPrivate}>
                         By registering, you confirm that you accept our
                     </Text>
-
                     <Text style={[styles.textPrivate, { color: '#e88832' }]}>
                         Terms of service
                     </Text>
@@ -69,8 +98,23 @@ const Signup = ({ navigation }) => {
                         Privacy Policy
                     </Text>
                 </View>
-                <CustomButton title='Sign Up' onPress={() => {
-                    SIGN_UP(name, email, password, '', setSpinner, navigation)
+                <CustomButton title='Sign Up' color={Colors.blue} onPress={() => {
+                    if (!name || !email || !password) {
+                        setIsShow(true)
+                        setIsSuccess(false)
+                        setTitle('Please fill information')
+                    } else if (password.length < 6) {
+                        setIsShow(true)
+                        setIsSuccess(false)
+                        setTitle('Password must be at least 6 characters')
+                    } else {
+                        SIGN_UP(
+                            name, email, password, '',
+                            setSpinner, setIsShow, setIsSuccess, setTitle,
+                            setName, setEmail, setPassword
+                        )
+
+                    }
                 }
                 } />
                 <CustomImageButton
@@ -116,12 +160,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white,
         padding: 10,
         alignItems: 'center'
-    },
-    text: {
-        fontFamily: Fonts.bold,
-        fontSize: 28,
-        marginBottom: 10,
-        color: Colors.blue,
     },
     wrapText: {
         flexDirection: 'row',

@@ -2,9 +2,11 @@ import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { DimensionDevice, Colors, Fonts } from '../constants'
 
-const CustomButton = ({ title, ...rest }) => {
+const CustomButton = ({ title, color, ...rest }) => {
     return (
-        <TouchableOpacity style={styles.button} {...rest}>
+        <TouchableOpacity style={[styles.button, {
+            backgroundColor: color,
+        }]} {...rest}>
             <Text style={styles.text}>{title}</Text>
         </TouchableOpacity>
     )
@@ -17,7 +19,6 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         width: '100%',
         height: DimensionDevice.windowHeight / 15,
-        backgroundColor: Colors.blue,
         padding: 10,
         alignItems: 'center',
         justifyContent: 'center',

@@ -18,14 +18,16 @@ import {
     GET_CURRENT_USER_GOOGLE,
     GET_CURRENT_USER_FACEBOOK
 } from '../../firebase'
-import { CustomButton, CustomImageButton, CustomInput } from '../../components'
+import { CustomButton, CustomImageButton, CustomInput, CustomAlert } from '../../components'
 import { Colors, Fonts } from '../../constants'
 import { GET_ITEM } from '../../asyncstorage'
 
 const Login = ({ navigation }) => {
-    const [email, setEmail] = useState()
-    const [password, setPassword] = useState()
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
     const [spinner, setSpinner] = useState(false)
+    const [title, setTitle] = useState('')
+    const [isShow, setIsShow] = useState(false)
 
     useEffect(() => {
         GoogleSignin.configure({
@@ -33,7 +35,7 @@ const Login = ({ navigation }) => {
         })
     }, [])
 
-    useEffect(async () => {
+    const CheckUser = async () => {
         setSpinner(true)
         const id = await GET_ITEM('ID')
         if (id) {
@@ -41,15 +43,34 @@ const Login = ({ navigation }) => {
             setSpinner(false)
         }
         setSpinner(false)
+    }
+
+    const SetIsShow = () => {
+        setIsShow(false)
+    }
+
+    useEffect(() => {
+        CheckUser()
     }, [])
 
     return (
         <ScrollView>
+            {
+                isShow ? <CustomAlert
+                    name='exclamationcircleo'
+                    title='Login unsuccessful'
+                    description={title}
+                    color={'#FF0000'}
+                    navigation={navigation}
+                    SetIsShow={SetIsShow}
+                    isSuccess={false}
+                /> : null
+            }
             <View style={styles.container}>
                 <Image source={require('../../assets/images/logo.png')} resizeMode='cover' />
                 <CustomInput
                     name='mail'
-                    labelValue={email}
+                    value={email}
                     onChangeText={userEmail => setEmail(userEmail)}
                     placeholder='Email'
                     keyboardType="email-address"
@@ -58,12 +79,26 @@ const Login = ({ navigation }) => {
                 />
                 <CustomInput
                     name='lock'
-                    labelValue={password}
+                    value={password}
                     onChangeText={userPassword => setPassword(userPassword)}
                     placeholder='Password'
                     secureTextEntry={true}
                 />
-                <CustomButton title='Sign In' onPress={() => SIGN_IN(email, password, navigation, setSpinner)} />
+                <CustomButton
+                    title='Sign In'
+                    color={Colors.blue}
+                    onPress={() => {
+                        if (!email || !password) {
+                            setIsShow(true)
+                            setTitle('Please fill information')
+                        } else if (password.length < 6) {
+                            setIsShow(true)
+                            setTitle('Password must be at least 6 characters')
+                        } else {
+                            SIGN_IN(email, password, navigation, setSpinner, setIsShow, setTitle, setEmail, setPassword,)
+                        }
+                    }}
+                />
                 <TouchableOpacity style={styles.wrapForgot} onPress={() => Alert.alert('a')}>
                     <Text style={styles.textForgot}>Forgot Password?</Text>
                 </TouchableOpacity>

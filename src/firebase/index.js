@@ -4,9 +4,8 @@ import auth from '@react-native-firebase/auth'
 import database from '@react-native-firebase/database'
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
-import { SET_ITEM, REMOVE_ITEM } from '../asyncstorage'
 import moment from 'moment'
-import { cleanSingle } from "react-native-image-crop-picker";
+import { SET_ITEM, REMOVE_ITEM } from '../asyncstorage'
 
 const ADD_USER = (id, name, email, image) => {
     database()
@@ -19,61 +18,64 @@ const ADD_USER = (id, name, email, image) => {
         })
 }
 
-export const SIGN_UP = (name, email, password, image, setSpinner, navigation) => {
+export const SIGN_UP = (name, email, password, image, setSpinner, setIsShow, setIsSuccess, setTitle, setName, setEmail, setPassword) => {
     setSpinner(true)
     auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
             let id = auth().currentUser.uid
-            ADD_USER(id, name, email, image)
-            Alert.alert(
-                "Alert Title",
-                "My Alert Msg",
-                [
-                    {
-                        text: "Cancel",
-                        onPress: () => console.log("Cancel Pressed"),
-                        style: "cancel"
-                    },
-                    { text: "OK", onPress: () => navigation.navigate('Login') }
-                ]
-            );
+            //ADD_USER(id, name, email, image);
             setSpinner(false)
+            setIsShow(true)
+            setIsSuccess(true)
+            setName('')
+            setEmail('')
+            setPassword('')
         })
         .catch(error => {
-            if (error.code === 'auth/email-already-in-use') {
-                console.log('That email address is already in use!')
-            }
-            if (error.code === 'auth/invalid-email') {
-                console.log('That email address is invalid!')
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    setTitle('That email address is already in use!')
+                    break
+                case 'auth/invalid-email':
+                    setTitle('That email address is invalid!')
+                    break
+                default:
+                    setTitle(error)
             }
             setSpinner(false)
-            console.error(error)
+            setIsShow(true)
+            setIsSuccess(false)
         });
 }
 
-export const SIGN_IN = (email, password, navigation, setSpinner) => {
+export const SIGN_IN = (email, password, navigation, setSpinner, setIsShow, setTitle, setEmail, setPassword,) => {
     setSpinner(true)
     auth()
         .signInWithEmailAndPassword(email, password)
         .then(() => {
             SET_ITEM('ID', auth().currentUser.uid)
             setSpinner(false)
+            setEmail('')
+            setPassword('')
             navigation.navigate('Home')
         })
         .catch(error => {
-            if (error.code === 'auth/wrong-password') {
-                console.log('The password is invalid or the user does not have a password');
+            switch (error.code) {
+                case 'auth/wrong-password':
+                    setTitle('The password is invalid or the user does not have a password')
+                    break
+                case 'auth/user-not-found':
+                    setTitle('There is no user record corresponding to this identifier. The user may have been deleted')
+                    break
+                case 'auth/invalid-email':
+                    setTitle('The email address is badly formatted')
+                    break
+                default:
+                    setTitle(error)
             }
-
-            if (error.code === 'auth/user-not-found') {
-                console.log('There is no user record corresponding to this identifier. The user may have been deleted');
-            }
-            if (error.code === 'auth/invalid-email') {
-                console.log('The email address is badly formatted');
-            }
+            setIsShow(true)
             setSpinner(false)
-            console.error(error);
         });
 }
 
