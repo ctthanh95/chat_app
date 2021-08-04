@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Image } from 'react-native'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import Spinner from 'react-native-loading-spinner-overlay'
+import messaging from '@react-native-firebase/messaging'
+import firebase from '@react-native-firebase/app'
 import { Colors, Fonts } from '../../constants'
 import { CustomButton, CustomImageButton, CustomInput, CustomAlert } from '../../components'
 import {
@@ -20,6 +22,7 @@ const Signup = ({ navigation }) => {
     const [isShow, setIsShow] = useState(false)
     const [isSuccess, setIsSuccess] = useState(true)
     const [title, setTitle] = useState('')
+    const [token, setToken] = useState('')
 
     const SetIsShow = () => {
         setIsShow(false)
@@ -29,6 +32,10 @@ const Signup = ({ navigation }) => {
         GoogleSignin.configure({
             webClientId: '376268813058-4utruuio1kndakt69n5dites36ajerrd.apps.googleusercontent.com',
         })
+    }, [])
+
+    useEffect(() => {
+        messaging().getToken(firebase.app().options.messagingSenderId).then((result) => { setToken(result) })
     }, [])
 
     return (
@@ -109,7 +116,7 @@ const Signup = ({ navigation }) => {
                         setTitle('Password must be at least 6 characters')
                     } else {
                         SIGN_UP(
-                            name, email, password, '',
+                            name, email, password, '', token,
                             setSpinner, setIsShow, setIsSuccess, setTitle,
                             setName, setEmail, setPassword
                         )
@@ -123,7 +130,7 @@ const Signup = ({ navigation }) => {
                     color="#4867aa"
                     backgroundColor="#e6eaf4"
                     onPress={() => LOGIN_WITH_FACEBOOK().then(() => {
-                        GET_CURRENT_USER_FACEBOOK(navigation)
+                        GET_CURRENT_USER_FACEBOOK(navigation, token)
                     })}
                 />
                 <CustomImageButton
@@ -132,7 +139,7 @@ const Signup = ({ navigation }) => {
                     color="#de4d41"
                     backgroundColor="#f5e7ea"
                     onPress={() => LOGIN_WITH_GOOGLE().then(() => {
-                        GET_CURRENT_USER_GOOGLE(navigation)
+                        GET_CURRENT_USER_GOOGLE(navigation, token)
                     })}
                 />
                 <TouchableOpacity

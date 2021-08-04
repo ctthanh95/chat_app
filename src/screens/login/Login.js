@@ -11,6 +11,8 @@ import {
 } from 'react-native'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import Spinner from 'react-native-loading-spinner-overlay'
+import messaging from '@react-native-firebase/messaging'
+import firebase from '@react-native-firebase/app'
 import {
     SIGN_IN,
     LOGIN_WITH_FACEBOOK,
@@ -28,11 +30,16 @@ const Login = ({ navigation }) => {
     const [spinner, setSpinner] = useState(false)
     const [title, setTitle] = useState('')
     const [isShow, setIsShow] = useState(false)
+    const [token, setToken] = useState('')
 
     useEffect(() => {
         GoogleSignin.configure({
             webClientId: '376268813058-4utruuio1kndakt69n5dites36ajerrd.apps.googleusercontent.com',
         })
+    }, [])
+
+    useEffect(() => {
+        messaging().getToken(firebase.app().options.messagingSenderId).then((result) => { setToken(result) })
     }, [])
 
     const CheckUser = async () => {
@@ -108,7 +115,7 @@ const Login = ({ navigation }) => {
                     color="#4867aa"
                     backgroundColor="#e6eaf4"
                     onPress={() => LOGIN_WITH_FACEBOOK().then(() => {
-                        GET_CURRENT_USER_FACEBOOK(navigation)
+                        GET_CURRENT_USER_FACEBOOK(navigation, token)
                     })}
                 />
                 <CustomImageButton
@@ -117,7 +124,7 @@ const Login = ({ navigation }) => {
                     color="#de4d41"
                     backgroundColor="#f5e7ea"
                     onPress={() => LOGIN_WITH_GOOGLE().then(() => {
-                        GET_CURRENT_USER_GOOGLE(navigation)
+                        GET_CURRENT_USER_GOOGLE(navigation, token)
                     })}
                 />
                 <TouchableOpacity

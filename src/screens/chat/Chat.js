@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Image, Keyboard } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Image, Keyboard, Button } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import ImagePicker from 'react-native-image-crop-picker'
 import ImgToBase64 from 'react-native-image-base64'
+import axios from 'axios'
 import { Colors, Fonts, DimensionDevice } from '../../constants'
 import { SEND_MESSAGE, RECEIVE_MESSAGE, GET_ALL_MESSAGES_BETWEEN_SENDER_RECEIVER } from '../../firebase'
 
 const Chat = ({ route }) => {
-    const { receiver, sender, imageSender, imageReceiver } = route.params
+    const { receiver, sender, imageSender, imageReceiver, token, title } = route.params
     const [spinner, setSpinner] = useState(false)
     const [message, setMessage] = useState('')
     const [allMessages, setAllMessages] = useState([])
@@ -29,6 +30,19 @@ const Chat = ({ route }) => {
                     let source = "data:image/jpeg;base64," + base64String
                     SEND_MESSAGE(sender, receiver, '', source)
                     RECEIVE_MESSAGE(sender, receiver, '', source)
+                    axios.post('http://192.168.1.16:3000/notifications', {
+                        token: token,
+                        title: title + ' send you a photo!',
+                        body: 'Photo',
+                    }, {
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                        .then(function (response) {
+                            console.log('OK');
+                        })
+                        .catch(function (error) {
+                            console.log('Chat: ', error.response.data);
+                        });
                 })
                 .catch(err => console.log(err));
         });
@@ -39,6 +53,19 @@ const Chat = ({ route }) => {
         if (message) {
             SEND_MESSAGE(sender, receiver, message, '')
             RECEIVE_MESSAGE(sender, receiver, message, '')
+            axios.post('http://192.168.1.16:3000/notifications', {
+                token: token,
+                title: title + ' send you a message!',
+                body: message,
+            }, {
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(function (response) {
+                    console.log('OK');
+                })
+                .catch(function (error) {
+                    console.log('Chat: ', error.response.data);
+                });
             Keyboard.dismiss()
             setMessage('')
         }
@@ -256,7 +283,7 @@ const styles = StyleSheet.create({
     },
     wrapText: {
         padding: 10,
-        height: 50,
+        minHeight: 50,
         justifyContent: 'center',
         borderRadius: 10,
         flexDirection: 'row',

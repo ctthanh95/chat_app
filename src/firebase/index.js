@@ -7,7 +7,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import moment from 'moment'
 import { SET_ITEM, REMOVE_ITEM } from '../asyncstorage'
 
-const ADD_USER = (id, name, email, image) => {
+const ADD_USER = (id, name, email, image, token) => {
     database()
         .ref('/users/' + id)
         .set({
@@ -15,16 +15,17 @@ const ADD_USER = (id, name, email, image) => {
             name: name,
             email: email,
             image: image,
+            token: token,
         })
 }
 
-export const SIGN_UP = (name, email, password, image, setSpinner, setIsShow, setIsSuccess, setTitle, setName, setEmail, setPassword) => {
+export const SIGN_UP = (name, email, password, image, token, setSpinner, setIsShow, setIsSuccess, setTitle, setName, setEmail, setPassword) => {
     setSpinner(true)
     auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
             let id = auth().currentUser.uid
-            //ADD_USER(id, name, email, image);
+            ADD_USER(id, name, email, image, token);
             setSpinner(false)
             setIsShow(true)
             setIsSuccess(true)
@@ -110,19 +111,19 @@ export const LOGIN_WITH_GOOGLE = async () => {
     return auth().signInWithCredential(googleCredential);
 }
 
-export const GET_CURRENT_USER_GOOGLE = async (navigation) => {
+export const GET_CURRENT_USER_GOOGLE = async (navigation, token) => {
     const currentUser = await GoogleSignin.getCurrentUser();
     const infoUser = currentUser.user
     let id = auth().currentUser.uid
     SET_ITEM('ID', id)
-    ADD_USER(id, infoUser.name, infoUser.email, infoUser.photo)
+    ADD_USER(id, infoUser.name, infoUser.email, infoUser.photo, token)
     navigation.navigate('Home')
 };
 
-export const GET_CURRENT_USER_FACEBOOK = (navigation) => {
+export const GET_CURRENT_USER_FACEBOOK = (navigation, token) => {
     const infoUser = auth().currentUser
     SET_ITEM('ID', infoUser.uid)
-    ADD_USER(infoUser.uid, infoUser.displayName, infoUser.email, infoUser.photoURL)
+    ADD_USER(infoUser.uid, infoUser.displayName, infoUser.email, infoUser.photoURL, token)
     navigation.navigate('Home')
 };
 
@@ -138,11 +139,15 @@ export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoos
                 if (e.val().id === id) {
                     setUserName(e.val().name);
                     setImageChoose(e.val().image);
+                    if (Object.keys(snapshot.val()).length == 1) {
+                        setSpinner(false)
+                    }
                 } else {
                     let userTemp = {
                         id: '',
                         name: '',
                         image: '',
+                        token: '',
                         lastMessage: '',
                         lastDate: '',
                         lastTime: '',
@@ -164,10 +169,12 @@ export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoos
                                     lastDate = ''
                                     lastTime = ''
                                     lastDateTime = ''
+                                    setSpinner(false)
                                 }
                                 userTemp.id = e.val().id
                                 userTemp.name = e.val().name
                                 userTemp.image = e.val().image
+                                userTemp.token = e.val().token
                                 userTemp.lastMessage = lastMessage
                                 userTemp.lastDate = lastDate
                                 userTemp.lastTime = lastTime

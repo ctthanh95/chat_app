@@ -16,12 +16,19 @@ const Home = ({ navigation }) => {
     const [userName, setUserName] = useState('')
     const [sender, setSender] = useState('')
 
-    useEffect(async () => {
+    const Get_Id_From_Async = async () => {
         setSender(await GET_ITEM('ID'))
+    }
+
+    useEffect(() => {
+        Get_Id_From_Async()
     }, [])
 
     useEffect(() => {
-        GET_ALL_USER(setAllUsers, setSpinner, setUserName, setImageChoose)
+        const unsubscribe = navigation.addListener('focus', () => {
+            GET_ALL_USER(setAllUsers, setSpinner, setUserName, setImageChoose)
+        });
+        return unsubscribe;
     }, [])
 
     const ChooseImage = () => {
@@ -55,11 +62,7 @@ const Home = ({ navigation }) => {
 
                 <View style={styles.wrapText}>
                     <Text style={styles.text}>{userName}</Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            console.log(allUsers)
-                        }}
-                    >
+                    <TouchableOpacity>
                         <AntDesign name={'setting'} size={20} color={'white'} />
                     </TouchableOpacity>
                 </View>
@@ -74,17 +77,14 @@ const Home = ({ navigation }) => {
                             onPress={() => navigation.navigate('Chat', {
                                 title: item.name,
                                 receiver: item.id,
+                                token: item.token,
                                 sender: sender,
                                 imageSender: imageChoose === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : imageChoose,
                                 imageReceiver: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image
                             })}
                         >
-
-
-
                             <View style={styles.wrapImageItem}>
                                 <Image style={styles.itemImage} source={{ uri: item.image === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : item.image }} />
-
                             </View>
                             {
                                 item.lastMessage === '' ? (
@@ -109,7 +109,6 @@ const Home = ({ navigation }) => {
                                     </View>
                                 )
                             }
-
                         </TouchableOpacity>
                     )
                 }}
