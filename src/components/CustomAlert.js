@@ -6,7 +6,7 @@ import { Colors, Fonts } from '../constants'
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const CustomAlert = ({ name, title, description, color, navigation, SetIsShow, isSuccess }) => {
+const CustomAlert = ({ name, title, description, color, navigation, SetIsShow, isSuccess, nameScreen, titleButton }) => {
 
     const [modal, setModal] = useState(true)
 
@@ -26,9 +26,9 @@ const CustomAlert = ({ name, title, description, color, navigation, SetIsShow, i
                         isSuccess ? (
                             <View style={{ width: '100%' }}>
                                 <CustomButton
-                                    title='Sing In '
+                                    title={titleButton ? titleButton : 'Sing In'}
                                     color={Colors.blue}
-                                    onPress={() => navigation.navigate('Login')}
+                                    onPress={() => navigation.navigate(nameScreen)}
                                 />
                                 <CustomButton
                                     title='Cancel'

@@ -7,7 +7,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import moment from 'moment'
 import { SET_ITEM, REMOVE_ITEM } from '../asyncstorage'
 
-const ADD_USER = (id, name, email, image, token) => {
+const ADD_USER = (id, name, email, image, token, type) => {
     database()
         .ref('/users/' + id)
         .set({
@@ -16,7 +16,14 @@ const ADD_USER = (id, name, email, image, token) => {
             email: email,
             image: image,
             token: token,
+            type: type,
         })
+}
+
+const SEND_EMAIL_VERIFICATION = () => {
+    auth().currentUser.sendEmailVerification()
+        .then(() => {
+        });
 }
 
 export const SIGN_UP = (name, email, password, image, token, setSpinner, setIsShow, setIsSuccess, setTitle, setName, setEmail, setPassword) => {
@@ -25,7 +32,8 @@ export const SIGN_UP = (name, email, password, image, token, setSpinner, setIsSh
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
             let id = auth().currentUser.uid
-            ADD_USER(id, name, email, image, token);
+            ADD_USER(id, name, email, image, token, 'email')
+            SEND_EMAIL_VERIFICATION()
             setSpinner(false)
             setIsShow(true)
             setIsSuccess(true)
@@ -55,11 +63,17 @@ export const SIGN_IN = (email, password, navigation, setSpinner, setIsShow, setT
     auth()
         .signInWithEmailAndPassword(email, password)
         .then(() => {
-            SET_ITEM('ID', auth().currentUser.uid)
-            setSpinner(false)
-            setEmail('')
-            setPassword('')
-            navigation.navigate('Home')
+            if (auth().currentUser.emailVerified) {
+                SET_ITEM('ID', auth().currentUser.uid)
+                setSpinner(false)
+                setEmail('')
+                setPassword('')
+                navigation.navigate('Home')
+            } else {
+                setTitle('Your email address is currently unverified')
+                setIsShow(true)
+                setSpinner(false)
+            }
         })
         .catch(error => {
             switch (error.code) {
@@ -78,6 +92,7 @@ export const SIGN_IN = (email, password, navigation, setSpinner, setIsShow, setT
             setIsShow(true)
             setSpinner(false)
         });
+
 }
 
 export const LOGIN_WITH_FACEBOOK = async () => {
@@ -116,18 +131,18 @@ export const GET_CURRENT_USER_GOOGLE = async (navigation, token) => {
     const infoUser = currentUser.user
     let id = auth().currentUser.uid
     SET_ITEM('ID', id)
-    ADD_USER(id, infoUser.name, infoUser.email, infoUser.photo, token)
+    ADD_USER(id, infoUser.name, infoUser.email, infoUser.photo, token, 'google')
     navigation.navigate('Home')
 };
 
 export const GET_CURRENT_USER_FACEBOOK = (navigation, token) => {
     const infoUser = auth().currentUser
     SET_ITEM('ID', infoUser.uid)
-    ADD_USER(infoUser.uid, infoUser.displayName, infoUser.email, infoUser.photoURL, token)
+    ADD_USER(infoUser.uid, infoUser.displayName, infoUser.email, infoUser.photoURL, token, 'facebook')
     navigation.navigate('Home')
 };
 
-export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoose) => {
+export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoose, setTypeLogin) => {
     setSpinner(true)
     database()
         .ref('/users')
@@ -137,8 +152,9 @@ export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoos
             let lastMessage, lastTime, lastDate, lastDateTime
             snapshot.forEach(e => {
                 if (e.val().id === id) {
-                    setUserName(e.val().name);
-                    setImageChoose(e.val().image);
+                    setUserName(e.val().name)
+                    setImageChoose(e.val().image)
+                    setTypeLogin(e.val().type)
                     if (Object.keys(snapshot.val()).length == 1) {
                         setSpinner(false)
                     }
@@ -258,3 +274,46 @@ export const GET_ALL_MESSAGES_BETWEEN_SENDER_RECEIVER = (sender, receiver, setAl
         });
 }
 
+export const SEND_PASSWORD_RESET_EMAIL = (email, setIsShow, setIsSuccess, setTitle) => {
+    auth().sendPasswordResetEmail(email)
+        .then(() => {
+            setIsShow(true)
+            setIsSuccess(true)
+        })
+        .catch((error) => {
+            setIsShow(true)
+            setIsSuccess(false)
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    setTitle('The email address is badly formatted')
+                    break;
+                case 'auth/user-not-found':
+                    setTitle('There is no user record corresponding to this identifier. The user may have been deleted')
+                    break;
+                default:
+                    console.log(error)
+            }
+        });
+}
+
+export const UPDATE_PASSWORD = (newpassword, setIsShow, setIsSuccess,) => {
+    const user = auth().currentUser
+    user.updatePassword(newpassword).then(() => {
+        setIsShow(true)
+        setIsSuccess(true)
+    }).catch((error) => {
+        console.log(error)
+    });
+}
+
+export const DELETE_USER = (navigation, setIsShow, setIsSuccess, setTitle) => {
+    const user = auth().currentUser
+    user.delete().then(() => {
+        REMOVE_ITEM('ID')
+        navigation.navigate('Login')
+    }).catch((error) => {
+        setIsShow(true)
+        setIsSuccess(false)
+        setTitle('Please login again to delete account')
+    });
+}

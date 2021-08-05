@@ -45,10 +45,11 @@ const Signup = ({ navigation }) => {
                     isShow ? <CustomAlert
                         name='checkcircleo'
                         title='Success'
-                        description='Registration successful'
+                        description='Please check your email'
                         color={Colors.blue}
                         navigation={navigation}
                         SetIsShow={SetIsShow}
+                        nameScreen='Login'
                         isSuccess={isSuccess}
                     /> : null
                 ) : (
@@ -58,6 +59,7 @@ const Signup = ({ navigation }) => {
                         description={title}
                         color={'#FF0000'}
                         navigation={navigation}
+                        nameScreen='Login'
                         SetIsShow={SetIsShow}
                         isSuccess={isSuccess} /> : null
                 )

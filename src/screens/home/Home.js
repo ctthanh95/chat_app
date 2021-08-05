@@ -15,6 +15,7 @@ const Home = ({ navigation }) => {
     const [imageChoose, setImageChoose] = useState('')
     const [userName, setUserName] = useState('')
     const [sender, setSender] = useState('')
+    const [typeLogin, setTypeLogin] = useState('')
 
     const Get_Id_From_Async = async () => {
         setSender(await GET_ITEM('ID'))
@@ -26,7 +27,7 @@ const Home = ({ navigation }) => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            GET_ALL_USER(setAllUsers, setSpinner, setUserName, setImageChoose)
+            GET_ALL_USER(setAllUsers, setSpinner, setUserName, setImageChoose, setTypeLogin)
         });
         return unsubscribe;
     }, [])
@@ -59,10 +60,13 @@ const Home = ({ navigation }) => {
                         source={{ uri: imageChoose === '' ? 'https://huyhoanhotel.com/wp-content/uploads/2016/05/765-default-avatar.png' : imageChoose }}
                     />
                 </TouchableOpacity>
-
                 <View style={styles.wrapText}>
                     <Text style={styles.text}>{userName}</Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Account', {
+                            typeLogin: typeLogin
+                        })}
+                    >
                         <AntDesign name={'setting'} size={20} color={'white'} />
                     </TouchableOpacity>
                 </View>

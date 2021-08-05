@@ -69,6 +69,7 @@ const Login = ({ navigation }) => {
                     description={title}
                     color={'#FF0000'}
                     navigation={navigation}
+                    nameScreen='Login'
                     SetIsShow={SetIsShow}
                     isSuccess={false}
                 /> : null
@@ -106,7 +107,7 @@ const Login = ({ navigation }) => {
                         }
                     }}
                 />
-                <TouchableOpacity style={styles.wrapForgot} onPress={() => Alert.alert('a')}>
+                <TouchableOpacity style={styles.wrapForgot} onPress={() => navigation.navigate('Resetpassword')}>
                     <Text style={styles.textForgot}>Forgot Password?</Text>
                 </TouchableOpacity>
                 <CustomImageButton

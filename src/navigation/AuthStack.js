@@ -5,7 +5,9 @@ import {
     Onboard,
     Signup,
     Home,
-    Chat
+    Chat,
+    Account,
+    Resetpassword
 } from '../screens'
 import { SIGN_OUT } from '../firebase'
 import { CustomHeader } from '../components'
@@ -102,6 +104,48 @@ const AuthStack = () => {
                             <CustomHeader
                                 name='arrowleft'
                                 onPress={() => navigation.navigate('Home')}
+                            />
+                        )
+
+                    }
+                })}
+            />
+            <Stack.Screen
+                name="Account"
+                component={Account}
+                options={({ navigation }) => ({
+                    title: "Account",
+                    headerStyle: {
+                        backgroundColor: '#f9fafd',
+                        shadowColor: '#f9fafd',
+                        elevation: 0
+                    },
+                    headerLeft: () => {
+                        return (
+                            <CustomHeader
+                                name='arrowleft'
+                                onPress={() => navigation.navigate('Home')}
+                            />
+                        )
+
+                    }
+                })}
+            />
+            <Stack.Screen
+                name="Resetpassword"
+                component={Resetpassword}
+                options={({ navigation }) => ({
+                    title: 'Forgot Password',
+                    headerStyle: {
+                        backgroundColor: '#f9fafd',
+                        shadowColor: '#f9fafd',
+                        elevation: 0
+                    },
+                    headerLeft: () => {
+                        return (
+                            <CustomHeader
+                                name='arrowleft'
+                                onPress={() => navigation.navigate('Login')}
                             />
                         )
 
