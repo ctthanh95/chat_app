@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import PushNotification, { Importance } from "react-native-push-notification"
 import messaging from '@react-native-firebase/messaging'
 import Providers from './src/navigation'
+import SplashScreen from 'react-native-splash-screen'
 
 const App = () => {
   const createChanel = (channelId) => {
@@ -37,6 +38,9 @@ const App = () => {
     });
 
   }
+  useEffect(() => {
+    SplashScreen.hide();
+  }, [])
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       let chanelId = Math.random().toString(36).substring(7)

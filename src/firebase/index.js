@@ -147,7 +147,10 @@ export const GET_ALL_USER = (setAllUsers, setSpinner, setUserName, setImageChoos
     database()
         .ref('/users')
         .on('value', snapshot => {
-            let id = auth().currentUser.uid
+            let id
+            if (auth().currentUser) {
+                id = auth().currentUser.uid
+            }
             let users = []
             let lastMessage, lastTime, lastDate, lastDateTime
             snapshot.forEach(e => {
@@ -308,11 +311,12 @@ export const UPDATE_PASSWORD = (newpassword, setIsShow, setIsSuccess,) => {
 
 export const DELETE_USER = (navigation, setIsShow, setIsSuccess, setTitle) => {
     const user = auth().currentUser
+    const id = auth().currentUser.uid
     user.delete().then(async () => {
         REMOVE_ITEM('ID')
+        await database().ref('/users/' + id).remove()
+        await database().ref('/messages/' + id).remove()
         navigation.navigate('Login')
-        await database().ref('/users/' + user.uid).remove()
-        await database().ref('/messages/' + user.uid).remove()
     }).catch((error) => {
         setIsShow(true)
         setIsSuccess(false)
