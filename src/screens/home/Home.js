@@ -79,6 +79,7 @@ const Home = ({ navigation }) => {
                         <TouchableOpacity
                             style={styles.wrapItem}
                             onPress={() => navigation.navigate('Chat', {
+                                userName: userName,
                                 title: item.name,
                                 receiver: item.id,
                                 token: item.token,
@@ -102,7 +103,6 @@ const Home = ({ navigation }) => {
                                             <Text nunumberOfLines={1} style={styles.time}>
                                                 {
                                                     moment(item.lastTime + " " + item.lastDate, "HH:mm:ss YYYY-MM-DD").fromNow()
-
                                                 }
                                             </Text>
                                         </View>

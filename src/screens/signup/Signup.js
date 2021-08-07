@@ -39,7 +39,7 @@ const Signup = ({ navigation }) => {
     }, [])
 
     return (
-        <ScrollView>
+        <ScrollView style={{ flex: 1 }}>
             {
                 isSuccess ? (
                     isShow ? <CustomAlert

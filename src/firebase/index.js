@@ -308,9 +308,11 @@ export const UPDATE_PASSWORD = (newpassword, setIsShow, setIsSuccess,) => {
 
 export const DELETE_USER = (navigation, setIsShow, setIsSuccess, setTitle) => {
     const user = auth().currentUser
-    user.delete().then(() => {
+    user.delete().then(async () => {
         REMOVE_ITEM('ID')
         navigation.navigate('Login')
+        await database().ref('/users/' + user.uid).remove()
+        await database().ref('/messages/' + user.uid).remove()
     }).catch((error) => {
         setIsShow(true)
         setIsSuccess(false)

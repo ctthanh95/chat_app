@@ -68,8 +68,6 @@ const Account = ({ navigation, route }) => {
                                 secureTextEntry={true}
                             />
                             <CustomButton
-                                disabled={true}
-                                opacity={0}
                                 title='Save'
                                 color={Colors.blue}
                                 onPress={() => {

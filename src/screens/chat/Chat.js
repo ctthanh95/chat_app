@@ -10,7 +10,7 @@ import { Colors, Fonts, DimensionDevice } from '../../constants'
 import { SEND_MESSAGE, RECEIVE_MESSAGE, GET_ALL_MESSAGES_BETWEEN_SENDER_RECEIVER } from '../../firebase'
 
 const Chat = ({ route }) => {
-    const { receiver, sender, imageSender, imageReceiver, token, title } = route.params
+    const { receiver, sender, imageSender, imageReceiver, token, title, userName } = route.params
     const [spinner, setSpinner] = useState(false)
     const [message, setMessage] = useState('')
     const [allMessages, setAllMessages] = useState([])
@@ -32,7 +32,7 @@ const Chat = ({ route }) => {
                     RECEIVE_MESSAGE(sender, receiver, '', source)
                     axios.post('http://192.168.1.16:3000/notifications', {
                         token: token,
-                        title: title + ' send you a photo!',
+                        title: userName + ' send you a photo!',
                         body: 'Photo',
                     }, {
                         headers: { 'Content-Type': 'application/json' }
@@ -55,7 +55,7 @@ const Chat = ({ route }) => {
             RECEIVE_MESSAGE(sender, receiver, message, '')
             axios.post('http://192.168.1.16:3000/notifications', {
                 token: token,
-                title: title + ' send you a message!',
+                title: userName + ' send you a message!',
                 body: message,
             }, {
                 headers: { 'Content-Type': 'application/json' }
